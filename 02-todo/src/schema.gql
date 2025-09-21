@@ -8,6 +8,13 @@ type Todo {
   done: Boolean!
 }
 
+"""Todo quick aggregations"""
+type AggregationsType {
+  total: Int!
+  completed: Int!
+  pending: Int!
+}
+
 type Query {
   """This returns a string hello world"""
   helloWorldQuery: String!
@@ -17,15 +24,29 @@ type Query {
 
   """This returns an integer number between 0 and argument "to" default 6"""
   randomFromZeroTo(to: Int = 6): Int!
-  todos: [Todo!]!
+  todos(status: Boolean): [Todo!]!
   todo(id: Int!): Todo!
+  totalTodos: Int!
+  completedTodos: Int!
+  pendingTodos: Int!
+  aggregations: AggregationsType!
 }
 
 type Mutation {
   createTodo(createTodoInput: CreateTodoInput!): Todo!
+  updateTodo(updateTodoInput: UpdateTodoInput!): Todo!
+  deleteTodo(id: Int!): Boolean!
 }
 
 input CreateTodoInput {
   """what needs to be done?"""
   description: String!
+}
+
+input UpdateTodoInput {
+  id: Int!
+
+  """what needs to be done?"""
+  description: String
+  done: Boolean
 }
