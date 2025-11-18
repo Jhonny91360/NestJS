@@ -21,7 +21,7 @@ export const CurrentUser = createParamDecorator(
     if (roles.length === 0) return user;
 
     for (const rol of user.roles) {
-      // todo eliminate ValidRoles
+      // todo eliminate casting to ValidRoles
       if (roles.includes(rol as ValidRoles)) return user;
     }
 
