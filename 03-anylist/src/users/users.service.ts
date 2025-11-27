@@ -35,12 +35,20 @@ export class UsersService {
   }
 
   async findAll(roles: ValidRoles[]): Promise<User[]> {
-    if (roles.length === 0) return this.usersRepository.find();
+    if (roles.length === 0) {
+      return this.usersRepository.find({
+        // todo is not necesary because with define relation with lazy
+        // relations: {
+        //   lastUpdateBy: true,
+        // },
+      });
+    }
 
     return this.usersRepository
       .createQueryBuilder()
       .andWhere('ARRAY[roles] && ARRAY[:...roles]')
       .setParameter('roles', roles)
+
       .getMany();
   }
 
@@ -69,8 +77,11 @@ export class UsersService {
     return `This action updates a #${id} user`;
   }
 
-  async block(id: string): Promise<User> {
-    throw new Error('Not implemented');
+  async block(id: string, adminUser: User): Promise<User> {
+    const userToBlok = await this.findOneById(id);
+    userToBlok.isActive = false;
+    userToBlok.lastUpdateBy = adminUser;
+    return await this.usersRepository.save(userToBlok);
   }
 
   private handleDBErrors(error: any): never {
