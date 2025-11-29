@@ -5,7 +5,6 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateUserInput } from './dto/create-user.input';
 import { UpdateUserInput } from './dto/update-user.input';
 import { User } from './entities/user.entity';
 import { SignUpInput } from '../auth/dto/inputs/signup.input';
@@ -73,8 +72,25 @@ export class UsersService {
     }
   }
 
-  update(id: number, updateUserInput: UpdateUserInput) {
-    return `This action updates a #${id} user`;
+  async update(
+    id: string,
+    updateUserInput: UpdateUserInput,
+    adminUser: User,
+  ): Promise<User> {
+    try {
+      const user = await this.usersRepository.preload({
+        ...updateUserInput,
+        id,
+      });
+
+      if (!user) throw new NotFoundException(`User with id ${id} not found`);
+
+      user.lastUpdateBy = adminUser;
+      return this.usersRepository.save(user);
+    } catch (error) {
+      console.log('Erro updating user', error);
+      throw new InternalServerErrorException('Error updating user');
+    }
   }
 
   async block(id: string, adminUser: User): Promise<User> {
