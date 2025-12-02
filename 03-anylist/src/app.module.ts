@@ -8,17 +8,40 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
-    GraphQLModule.forRoot<ApolloDriverConfig>({
+
+    GraphQLModule.forRootAsync({
       driver: ApolloDriver,
-      // debug: false,
-      playground: false,
-      plugins: [ApolloServerPluginLandingPageLocalDefault({})],
-      autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+      imports: [AuthModule],
+      inject: [JwtService],
+      useFactory: async (jwtService: JwtService) => ({
+        playground: false,
+        autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+        plugins: [ApolloServerPluginLandingPageLocalDefault({})],
+        context: ({ req }) => {
+          // todo to use this logic , we need to separete login an signup , those service doesn't need a token
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+          // const token = req.headers?.authorization?.replace('Bearer ', '');
+          // if (!token) throw new Error('Token needed');
+          // // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-argument
+          // const payload = jwtService.decode(token);
+          // if (!payload) throw new Error('Token not valid');
+        },
+      }),
     }),
+    // todo basic configuration
+    // GraphQLModule.forRoot<ApolloDriverConfig>({
+    //   driver: ApolloDriver,
+    //   // debug: false,
+    //   playground: false,
+    //   plugins: [ApolloServerPluginLandingPageLocalDefault({})],
+    //   autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+    // }),
+
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.DB_HOST,
