@@ -13,6 +13,7 @@ import { SeedModule } from './seed/seed.module';
 import { CommonModule } from './common/common.module';
 import { ListsModule } from './lists/lists.module';
 import { ListItemModule } from './list-item/list-item.module';
+import { Console } from 'console';
 
 @Module({
   imports: [
@@ -48,6 +49,13 @@ import { ListItemModule } from './list-item/list-item.module';
 
     TypeOrmModule.forRoot({
       type: 'postgres',
+      ssl:
+        process.env.STATE === 'prod'
+          ? {
+              rejectUnauthorized: false, // it's depends on your deployment site
+              // sslmode: 'require',
+            }
+          : false,
       host: process.env.DB_HOST,
       port: Number(process.env.DB_PORT) ?? 5432,
       username: process.env.DB_USERNAME,
@@ -67,4 +75,12 @@ import { ListItemModule } from './list-item/list-item.module';
   controllers: [],
   providers: [],
 })
-export class AppModule {}
+export class AppModule {
+  constructor() {
+    console.log('State :', process.env.STATE);
+    console.log('Port :', process.env.DB_PORT);
+    console.log('Database host :', process.env.DB_HOST);
+    console.log('Database :', process.env.DB_NAME);
+    console.log('username :', process.env.DB_USERNAME);
+  }
+}

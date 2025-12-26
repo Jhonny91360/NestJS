@@ -11,7 +11,9 @@ async function bootstrap() {
       // forbidNonWhitelisted: true, // forbid unknown fields, desactivate to allow two or mor arguments with different types
     }),
   );
+  const PORT = process.env.PORT ?? 3000;
+  await app.listen(PORT);
 
-  await app.listen(process.env.PORT ?? 3000);
+  console.log(`App running on port ${PORT}`);
 }
 bootstrap();

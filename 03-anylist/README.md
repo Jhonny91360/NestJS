@@ -10,11 +10,11 @@
    ```
    pnpm install
    ```
-4. Start the image
+4. Start the image ( docker desktop)
    ```
    docker-compose up -d
    ```
-5. Start backend
+5. Start backend with Nest
    ```
    npm start:dev
    ```
@@ -22,3 +22,4 @@
    ```
    localhost:3000/graphql
    ```
+7. Execute **executeSeed** mutation to poblate database
