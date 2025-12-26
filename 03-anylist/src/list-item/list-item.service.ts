@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateListItemInput } from './dto/create-list-item.input';
 import { UpdateListItemInput } from './dto/update-list-item.input';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -32,7 +32,8 @@ export class ListItemService {
     const { search } = searchArgs;
 
     const queryBuilder = this.listItemRepository
-      .createQueryBuilder()
+      .createQueryBuilder('listItem')
+      .innerJoin('listItem.item', 'item')
       .take(limit)
       .skip(offset)
       .where(` "listId" = :listId`, { listId: list.id });
@@ -47,12 +48,47 @@ export class ListItemService {
     return items;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} listItem`;
+  async findOne(id: string): Promise<ListItem> {
+    const listItem = await this.listItemRepository.findOneBy({ id });
+    if (!listItem) {
+      throw new NotFoundException(`ListItem #${id} not found`);
+    }
+    return listItem;
   }
 
-  update(id: number, updateListItemInput: UpdateListItemInput) {
-    return `This action updates a #${id} listItem`;
+  async update(
+    id: string,
+    updateListItemInput: UpdateListItemInput,
+  ): Promise<ListItem> {
+    const { itemId, listId, ...rest } = updateListItemInput;
+
+    // const listItem = await this.listItemRepository.preload({
+    //   ...rest,
+    //   item: { id: itemId },
+    //   list: { id: listId }, // this methor doesn't change the list reference
+    // });
+
+    // if (!listItem) {
+    //   throw new NotFoundException(`ListItem #${id} not found`);
+    // }
+
+    // return this.listItemRepository.save(listItem);
+
+    const queryBuilder = this.listItemRepository
+      .createQueryBuilder()
+      .update()
+      .set(rest)
+      .where('id = :id', { id });
+
+    if (itemId) {
+      queryBuilder.set({ item: { id: itemId } });
+    }
+    if (listId) {
+      queryBuilder.set({ list: { id: listId } });
+    }
+
+    await queryBuilder.execute();
+    return this.findOne(id);
   }
 
   remove(id: number) {

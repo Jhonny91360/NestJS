@@ -27,7 +27,7 @@ export class ListItem {
 
   // Relations
   @ManyToOne(() => List, (list) => list.listItems, { lazy: true })
-  // @Field(() => List)
+  @Field(() => List)
   list: List;
 
   @ManyToOne(() => Item, (item) => item.listItems, { lazy: true })
