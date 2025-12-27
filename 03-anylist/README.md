@@ -23,3 +23,15 @@
    localhost:3000/graphql
    ```
 7. Execute **executeSeed** mutation to poblate database
+
+Optional : run backend and database with docker
+
+```
+docker-compose -f docker-compose.prod.yml --env-file .env.prod up --build
+```
+
+run from docker hub , my repo **jhonny91360/test-backend-nest-graphql**
+
+```
+docker run -p 3200:4000 --env-file=.env.prod jhonny91360/test-backend-nest-graphql:1.0.0
+```
